@@ -29,13 +29,11 @@ export class TensorflowDurable {
   async initialize() {
     console.log('init called')
     let stored = await this.state.storage.get("state") as Value | undefined
-    const model = await fetch(new Request('https://tfhub.dev/tensorflow/tfjs-model/tutorials/spam-detection/tfjs/1'))
-    console.log('model', model)
-    // @ts-ignore
-    this.value = stored
-    // || {
-    //   toxicityModel: await this.loadModel()
-    // }
+    // const model = await fetch(new Request('https://tfhub.dev/tensorflow/tfjs-model/tutorials/spam-detection/tfjs/1'))
+    // console.log('model', model)
+    this.value = stored || {
+      toxicityModel: await this.loadModel()
+    }
     console.log('init fin')
 
   }
