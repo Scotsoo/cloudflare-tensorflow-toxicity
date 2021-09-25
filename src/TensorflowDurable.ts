@@ -1,5 +1,19 @@
-import type tensorflow from '@tensorflow/tfjs'
+import * as tensorflow from '@tensorflow/tfjs'
 import * as toxicity from '@tensorflow-models/toxicity'
+tensorflow.setPlatform('cloudflare', {
+  fetch: fetch,
+  now: Date.now,
+  // @ts-ignore
+  decode: (text: string, encoding: string) => {
+    // @ts-ignore
+    return new Buffer(text, encoding).toString()
+  },
+  // @ts-ignore
+  encode: (bytes: Uint8Array, encoding: string) => {
+    // @ts-ignore
+    return new Buffer(bytes).toString(encoding)
+  }
+})
 interface Value {
   toxicityModel: toxicity.ToxicityClassifier
 }
@@ -29,8 +43,6 @@ export class TensorflowDurable {
   async initialize() {
     console.log('init called')
     let stored = await this.state.storage.get("state") as Value | undefined
-    // const model = await fetch(new Request('https://tfhub.dev/tensorflow/tfjs-model/tutorials/spam-detection/tfjs/1'))
-    // console.log('model', model)
     this.value = stored || {
       toxicityModel: await this.loadModel()
     }
@@ -56,7 +68,7 @@ export class TensorflowDurable {
     await this.initializePromise;
     console.log('after init')
     const data = await request.json() as RequestBody
-    return new Response(JSON.stringify(data))
+    // return new Response(JSON.stringify(data))
     return new Response(JSON.stringify(await this.value.toxicityModel.classify(data.messages)))
 
   }
