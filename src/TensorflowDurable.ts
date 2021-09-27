@@ -9,6 +9,13 @@ interface RequestBody {
 }
 
 const THRESHOLD = 0.7
+function splitArrayIntoChunksOfLen (arr: ArrayBuffer, len: number): ArrayBuffer[] {
+  let chunks = [], i = 0, n = arr.byteLength;
+  while (i < n) {
+    chunks.push(arr.slice(i, i += len));
+  }
+  return chunks;
+}
 export class TensorflowDurable {
   initializePromise?: Promise<void>
   value!: Value
@@ -16,15 +23,35 @@ export class TensorflowDurable {
   env: { [key: string]: string }
   toxicity!: toxicity.ToxicityClassifier
   async toxicityFetch (self: this, path: string, requestInits?: RequestInit | undefined, options?: tensorflow.io.RequestDetails | undefined) {
-    const stored = await this.state.storage.get(path) as ArrayBuffer
-    if (stored !== undefined) {
-      return new Response(stored)
+    const lengthCheck : {
+      length: number,
+      bytes: number
+    } = await this.state.storage.get(`${path}:LENGTH`)
+    if (lengthCheck !== undefined) {
+      const { bytes, length } = lengthCheck
+      const buffer = new Uint8Array(bytes)
+      let idx = 0
+      let last = 0
+      for (const iterator of [...new Array(length)]) {
+        const ab = await this.state.storage.get(`${path}:${idx++}`) as ArrayBuffer
+        buffer.set(new Uint8Array(ab), last)
+        last += ab.byteLength
+      }
+      const res = new Response(buffer.buffer)
+      return res
     }
-    console.log('path', path)
     const data = await fetch(path, requestInits)
     const str = await data.arrayBuffer()
-    console.log(path, 'bytes', str.byteLength)
-    await this.state.storage.put(path, str)
+    const split = splitArrayIntoChunksOfLen(str, 32000)
+    const promises: Promise<any>[] = []
+    promises.push(this.state.storage.put(`${path}:LENGTH`, {
+      length: split.length,
+      bytes: str.byteLength
+    }))
+    for (let index = 0; index < split.length; index++) {
+      promises.push(this.state.storage.put(`${path}:${index}`, split[index]))
+    }
+    await Promise.all(promises)
     return new Response(str)
     // return await fetch(path, requestInits)
   }
@@ -56,7 +83,10 @@ export class TensorflowDurable {
   }
 
   async loadModel (): Promise<toxicity.ToxicityClassifier> {
+    const loadStart = Date.now()
+    console.log('Loading model', loadStart)
     const model = await toxicity.load(THRESHOLD, [])
+    console.log('loaded model', Date.now() - loadStart)
     return model
   }
 
@@ -65,10 +95,8 @@ export class TensorflowDurable {
     // this.value = stored || {
     //   toxicityModel: await this.loadModel()
     // }
-    const loadStart = Date.now()
-    console.log('Loading model', loadStart)
+
     this.toxicity = await this.loadModel()
-    console.log('loaded model', Date.now() - loadStart)
     // this.toxicityModel = this.loadModel()
     // console.log('MODEL', this.value.toxicityModel)
     //   if (stored === undefined) {
@@ -116,4 +144,4 @@ export class TensorflowDurable {
   }
 
 
-}
+}1
