@@ -6,6 +6,20 @@ export { TensorflowDurable } from './TensorflowDurable'
 export default {
   async fetch(request: Request, env: Env) {
     try {
+      if (request.method.toUpperCase() === 'GET') {
+        return fetch(request)
+      }
+      if (request.method.toUpperCase() === 'OPTIONS') {
+        const headers = new Headers()
+        headers.set('content-type', 'application/json')
+        headers.set("Access-Control-Allow-Origin",  "*")
+        headers.set("Access-Control-Allow-Methods",  "GET,HEAD,POST,OPTIONS")
+        headers.set("Access-Control-Max-Age",  "86400")
+        headers.set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+        return new Response('Ok', {
+          headers
+        })
+      }
       return await handleRequest(request, env)
     } catch (e) {
       return new Response(JSON.stringify(e))
