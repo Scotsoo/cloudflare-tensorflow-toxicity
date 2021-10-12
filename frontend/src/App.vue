@@ -1,22 +1,48 @@
-<script setup lang="ts">
-import { ref } from 'vue'
+<script lang="ts">
+import { Ref, ref } from 'vue'
 
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import HelloWorld from './components/HelloWorld.vue'
 import axios from 'axios'
-async function doPost () {
-  const data = await axios.post('https://toxicity.scotsoo.me/', {
-    messages: 'you suck!'
-  })
-  console.log('data', data)
+export default {
+  setup () {
+    // @ts-ignore
+    let data: Ref<{
+      clasification: any[]
+    }> = ref({
+      clasification: []
+    })
+    let message: string = 'You suck!'
+    async function doPost () {
+      const d = await axios.post<{}>('https://toxicity.scotsoo.me/', {
+        // @ts-ignore
+        messages: this.message
+      })
+      console.log('data', d)
+      // @ts-ignore
+      this.data = d.data
+    }
+    return {
+      data, doPost,
+      message
+    }
+  }
 }
-const data = ref(0)
+
 </script>
 
 <template>
   <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
-  <button @click="doPost">Test</button>
+  <div>
+    <input v-model="message"/>
+    <button @click="doPost">Test</button>
+    <div v-for="clasification in data.clasification" :key="clasification.label">
+      <h3>{{clasification.label}}</h3>
+      <span>{{clasification.results}}</span>
+    </div>
+    Data is: <br/>
+    {{data}}
+  </div>
 </template>
 
 <style>
