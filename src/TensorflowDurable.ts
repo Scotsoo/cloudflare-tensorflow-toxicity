@@ -42,7 +42,7 @@ export class TensorflowDurable {
     const data = await fetch(path, requestInits)
     const str = await data.arrayBuffer()
     const split = splitArrayIntoChunksOfLen(str, 32000)
-    const promises: Promise<any>[] = []
+    const promises: Promise<void>[] = []
     promises.push(this.state.storage.put(`${path}:LENGTH`, {
       length: split.length,
       bytes: str.byteLength
@@ -59,21 +59,19 @@ export class TensorflowDurable {
     this.state = state;
     this.env = env
     tensorflow.setPlatform('cloudflare', {
-      // @ts-ignore
       fetch: (path, requestInits, c) => {
         return this.toxicityFetch(this, path, requestInits)
       },
       now: Date.now,
-      // @ts-ignore
-      decode: (text: string, encoding: string) => {
+      decode: (text: Uint8Array, encoding: string) => {
         // @ts-ignore
         return Buffer.from(text, encoding).toString()
       },
-      // @ts-ignore
-      encode: (bytes: Uint8Array, encoding: string) => {
+      encode: (text: string, encoding: string): Uint8Array => {
         // @ts-ignore
         return Buffer.from(bytes).toString(encoding)
       },
+      // requires https://github.com/tensorflow/tfjs/pull/5666 to be merged before this will work!
       loadInSerial: true
     })
     tensorflow.setBackend('cpu')
