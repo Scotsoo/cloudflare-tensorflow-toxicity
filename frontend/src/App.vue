@@ -9,7 +9,8 @@
     </div>
     <div class="centered">
       <input v-model="message"/>
-      <button @click="doPost">Test</button>
+      <button @click="doPost">Run!</button>
+      <h4>Last time taken {{timeTaken}}ms</h4>
       <table>
         <thead>
           <td></td>
@@ -61,6 +62,7 @@ import { Ref, ref } from 'vue'
 import axios from 'axios'
 export default {
   setup () {
+    let timeTaken = ref(0)
     // @ts-ignore
     let data: Ref<{
       clasification: any[]
@@ -86,17 +88,20 @@ export default {
       return labelMap[val]
     }
     async function doPost () {
+      const n = Date.now()
       const d = await axios.post<{}>('https://toxicity.scotsoo.me/', {
         // @ts-ignore
         messages: this.message
       })
+      // @ts-ignore
+      this.timeTaken = Date.now() - n
       console.log('data', d)
       // @ts-ignore
       this.data = d.data
     }
     return {
       data, doPost,
-      message, labelMap, getLabel
+      message, labelMap, getLabel, timeTaken
     }
   }
 }
