@@ -1,5 +1,4 @@
 // @ts-ignore
-import * as process from 'process'
 // In order for the workers runtime to find the class that implements
 // our Durable Object namespace, we must export it from the root module.
 export { TensorflowDurable } from './TensorflowDurable'
@@ -9,7 +8,7 @@ export default {
     try {
       return await handleRequest(request, env)
     } catch (e) {
-      return new Response(e)
+      return new Response(JSON.stringify(e))
     }
   },
 }

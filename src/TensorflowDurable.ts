@@ -32,8 +32,7 @@ export class TensorflowDurable {
       const buffer = new Uint8Array(bytes)
       let idx = 0
       let last = 0
-      for (const iterator of [...new Array(length)]) {
-        const ab = await this.state.storage.get(`${path}:${idx++}`) as ArrayBuffer
+      for (const ab of await Promise.all([...new Array(length)].map(() => this.state.storage.get<ArrayBuffer>(`${path}:${idx++}`)))) {
         buffer.set(new Uint8Array(ab), last)
         last += ab.byteLength
       }
@@ -53,7 +52,6 @@ export class TensorflowDurable {
     }
     await Promise.all(promises)
     return new Response(str)
-    // return await fetch(path, requestInits)
   }
 
 
@@ -63,19 +61,18 @@ export class TensorflowDurable {
     tensorflow.setPlatform('cloudflare', {
       // @ts-ignore
       fetch: (path, requestInits, c) => {
-
         return this.toxicityFetch(this, path, requestInits)
       },
       now: Date.now,
       // @ts-ignore
       decode: (text: string, encoding: string) => {
         // @ts-ignore
-        return new Buffer(text, encoding).toString()
+        return Buffer.from(text, encoding).toString()
       },
       // @ts-ignore
       encode: (bytes: Uint8Array, encoding: string) => {
         // @ts-ignore
-        return new Buffer(bytes).toString(encoding)
+        return Buffer.from(bytes).toString(encoding)
       },
       loadInSerial: true
     })
@@ -91,26 +88,17 @@ export class TensorflowDurable {
   }
 
   async initialize() {
-    // let stored = await this.state.storage.get("state") as Value | undefined
-    // this.value = stored || {
-    //   toxicityModel: await this.loadModel()
-    // }
-
     this.toxicity = await this.loadModel()
-    // this.toxicityModel = this.loadModel()
-    // console.log('MODEL', this.value.toxicityModel)
-    //   if (stored === undefined) {
-    //     // @ts-ignore
-    //     delete this.value.toxicityModel.model.handler.fetch
-    //     this.state.storage.put('state', this.value)
-    //   }
-    //   // @ts-ignore
-    //   this.value.toxicityModel.model.handler.fetch = toxicityFetch
   }
 
   async fetch(request: Request) {
+    if (request.headers.get('purge') === 'REINIT') {
+      this.initializePromise = undefined
+      return new Response('We purged baby!!')
+    }
     if (request.headers.get('purge') === 'PURGE') {
-      await this.state.storage.delete('state')
+      await this.state.storage.deleteAll()
+      this.initializePromise = undefined
       return new Response('We purged baby!!')
     }
     if (this.initializePromise === undefined) {
@@ -126,22 +114,13 @@ export class TensorflowDurable {
         throw err
       })
     }
-    const modelLoadStart = Date.now()
     await this.initializePromise;
-    const modelLoadEnd = Date.now()
     const data = await request.json() as RequestBody
-    const now = Date.now()
-    console.log(`starting clasification`, now)
-    // @ts-ignore
     const clasification = await this.toxicity.classify(data.messages)
-    // @ts-ignore
-    console.log(`clasification took`, Date.now() - now)
     const headers = new Headers()
     headers.set('content-type', 'application/json')
-    return new Response(JSON.stringify({ clasification, CLASSIFICATION_TIME_TAKEN: Date.now() - now, MODEL_LOAD_TIME: modelLoadEnd - modelLoadStart }), {
+    return new Response(JSON.stringify({ clasification }), {
       headers
     })
   }
-
-
-}1
+}
