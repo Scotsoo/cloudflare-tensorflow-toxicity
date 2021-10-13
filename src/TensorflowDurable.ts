@@ -22,7 +22,21 @@ export class TensorflowDurable {
   state: DurableObjectState
   env: { [key: string]: string }
   toxicity!: toxicity.ToxicityClassifier
+  fetchQueue: string[] = []
+  fetching: string[] = []
+  processing: string = ''
   async toxicityFetch (self: this, path: string, requestInits?: RequestInit | undefined, options?: tensorflow.io.RequestDetails | undefined) {
+    this.fetchQueue.push(path)
+    // Make sure we're only processing 2 files at a time cause durable objects can take upto 5 connections at once
+    while (this.fetching.length > 2) {
+      await new Promise(resolve => {
+        setTimeout(() => {
+          return resolve(0)
+        }, 100)
+      })
+    }
+    this.fetching.push(path)
+    this.fetchQueue.splice(this.fetchQueue.indexOf(path), 1)
     const lengthCheck : {
       length: number,
       bytes: number
@@ -32,11 +46,26 @@ export class TensorflowDurable {
       const buffer = new Uint8Array(bytes)
       let idx = 0
       let last = 0
-      for (const ab of await Promise.all([...new Array(length)].map(() => this.state.storage.get<ArrayBuffer>(`${path}:${idx++}`)))) {
-        buffer.set(new Uint8Array(ab), last)
-        last += ab.byteLength
+      let promises: Array<Promise<ArrayBuffer>> = []
+      for (const iterator of [...new Array(length)]) {
+        if (promises.length === 5) {
+          for (const ab of await Promise.all(promises)) {
+            buffer.set(new Uint8Array(ab), last)
+            last += ab.byteLength
+          }
+          promises = []
+        }
+        promises.push(this.state.storage.get(`${path}:${idx++}`))
+      }
+      if (promises.length > 0) {
+        for (const ab of await Promise.all(promises)) {
+          buffer.set(new Uint8Array(ab), last)
+          last += ab.byteLength
+        }
+        promises = []
       }
       const res = new Response(buffer.buffer)
+      this.fetching.splice(this.fetching.indexOf(path), 1)
       return res
     }
     const data = await fetch(path, requestInits)
@@ -51,6 +80,7 @@ export class TensorflowDurable {
       promises.push(this.state.storage.put(`${path}:${index}`, split[index]))
     }
     await Promise.all(promises)
+    this.fetching.splice(this.fetching.indexOf(path), 1)
     return new Response(str)
   }
 
@@ -70,9 +100,7 @@ export class TensorflowDurable {
       encode: (text: string, encoding: string): Uint8Array => {
         // @ts-ignore
         return Buffer.from(bytes).toString(encoding)
-      },
-      // requires https://github.com/tensorflow/tfjs/pull/5666 to be merged before this will work!
-      loadInSerial: true
+      }
     })
     tensorflow.setBackend('cpu')
   }
@@ -113,10 +141,14 @@ export class TensorflowDurable {
       })
     }
     await this.initializePromise;
+    console.log('init promise', this.initializePromise)
     const data = await request.json() as RequestBody
     const clasification = await this.toxicity.classify(data.messages)
     const headers = new Headers()
     headers.set('content-type', 'application/json')
+    headers.set("Access-Control-Allow-Origin",  "*")
+    headers.set("Access-Control-Allow-Methods",  "GET,HEAD,POST,OPTIONS")
+    headers.set("Access-Control-Max-Age",  "86400")
     return new Response(JSON.stringify({ clasification }), {
       headers
     })
