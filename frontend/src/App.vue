@@ -1,74 +1,56 @@
 <template>
-  <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
-  <div>
-    <div class="header">
-      <div class="vertical-center">
-        <h1>Toxicity API</h1>
-        <h4>WIP</h4>
-      </div>
-    </div>
-    <div class="centered">
-      <input v-model="message"/>
-      <button @click="doPost">Run!</button>
-      <h4>Last time taken {{timeTaken}}ms</h4>
-      <table>
-        <thead>
-          <td></td>
-          <td v-for="clasification in data.clasification" :key="clasification.label">
-            {{getLabel(clasification.label)}}
+  <div class="w-screen bg-gray-900 h-3/6">
+    <input v-model="message"/>
+    <button @click="doPost">Run!</button>
+    <custom-table :tableData="data"/>
+    <h4>Last time taken {{timeTaken}}ms</h4>
+    <!-- <table>
+      <thead>
+        <td></td>
+        <td v-for="clasification in data[0].clasification" :key="clasification.label">
+          {{getLabel(clasification.label)}}
+        </td>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            Is t/f:
           </td>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              Is t/f:
-            </td>
-            <td v-for="clasification in data.clasification" :key="`${clasification.label}-row`">
-              {{clasification.results[0].match}}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Percent True:
-            </td>
-            <td v-for="clasification in data.clasification" :key="`${clasification.label}-t`">
-              {{clasification.results[0].probabilities[1] * 100}}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Percent False:
-            </td>
-            <td v-for="clasification in data.clasification" :key="`${clasification.label}-f`">
-              {{clasification.results[0].probabilities[0] * 100}}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <!-- <div v-for="clasification in data.clasification" :key="clasification.label">
-      <h3>{{getLabel(clasification.label)}}</h3>
-      <span>{{clasification.results}}</span>
-    </div>
-    Data is: <br/>
-    {{data}} -->
+          <td v-for="clasification in data[0].clasification" :key="`${clasification.label}-row`">
+            {{clasification.results[0].match}}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Percent True:
+          </td>
+          <td v-for="clasification in data[0].clasification" :key="`${clasification.label}-t`">
+            {{clasification.results[0].probabilities[1] * 100}}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Percent False:
+          </td>
+          <td v-for="clasification in data[0].clasification" :key="`${clasification.label}-f`">
+            {{clasification.results[0].probabilities[0] * 100}}
+          </td>
+        </tr>
+      </tbody>
+    </table> -->
   </div>
 </template>
 <script lang="ts">
 import { Ref, ref } from 'vue'
-
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import axios from 'axios'
+import customTable from './components/table.vue'
 export default {
+  components: {customTable},
   setup () {
-    let timeTaken = ref(0)
     // @ts-ignore
     let data: Ref<{
-      clasification: any[]
-    }> = ref({
-      clasification: []
-    })
+      clasification?: any[]
+    }[]> = ref([])
     const labelMap: {
       [key: string]: string
     } = {
@@ -78,7 +60,8 @@ export default {
       'severe_toxicity': 'Severe Toxicity',
       'sexual_explicit': 'Sexually Explicit',
       'threat': 'Threat',
-      'toxicity': 'Toxicity'
+      'toxicity': 'Toxicity',
+      'time_taken': 'Time Taken'
     }
     let message: string = 'You suck!'
     function getLabel (val: string) {
@@ -89,61 +72,30 @@ export default {
     }
     async function doPost () {
       const n = Date.now()
+      const message = this?.message ?? 'You Suck!'
       const d = await axios.post<{}>('https://toxicity.scotsoo.me/', {
         // @ts-ignore
-        messages: this.message
+        messages: message
       })
       // @ts-ignore
-      this.timeTaken = Date.now() - n
       console.log('data', d)
+      d.data.time_taken = Date.now() - n
+      d.data.message = message
       // @ts-ignore
-      this.data = d.data
+      this.data.push(d.data)
     }
     return {
       data, doPost,
-      message, labelMap, getLabel, timeTaken
+      message, labelMap, getLabel
     }
+  },
+  async mounted () {
+    await this.doPost()
   }
 }
 
 </script>
 
-
 <style>
-body {
-  margin: 0;
-  padding: 0;
-  text-align: center;
-}
-.vertical-center {
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
-  text-align: center;
-  width: 100%;
-}
-table {
-  margin-left: auto;
-  margin-right: auto;
-  padding-top: 10px;
-}
-td {
-  padding-left: 1rem;
-}
-#app {
-  font-family: 'Roboto', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-.header {
-  color: white;
-  position: relative;
-  background-color: black;
-  width: 100%;
-  height: 30vh;
-}
+
 </style>
