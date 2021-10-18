@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col" v-if="tableData.length > 0">
+  <div class="flex flex-col">
     <div class="overflow-x-auto">
       <div class="align-middle inline-block min-w-full">
         <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
@@ -9,7 +9,7 @@
                 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Message
                 </th>
-                <th v-for="clasification in tableData[0].clasification" :key="clasification.label" scope="col" class="text-center px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th v-for="clasification in tableData[0]?.clasification || []" :key="clasification.label" scope="col" class="text-center px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{getLabel(clasification.label)}}
                 </th>
                 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
