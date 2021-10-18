@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="flex">
-      <div class="m-auto h-auto lg:w-10/12 md:w-100">
+      <div class="m-auto h-auto w-10/12">
         <custom-table :tableData="data"/>
       </div>
     </div>
