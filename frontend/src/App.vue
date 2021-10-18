@@ -1,8 +1,11 @@
 <template>
   <div>
     <div class="w-screen bg-gray-900 sm:h-1/6 lg:h-3/6 lg:min-h-1/3vh sm:min-h-1/4vh flex">
-      <div class="m-auto">
+      <div class="m-auto text-center">
         <h1 class="sm:text-4xl lg:text-9xl uppercase bold text-gray-100">Toxicity API</h1>
+        <h3 class="sm:text-l lg:text-4xl uppercase bold text-gray-100">
+          Cloudflare Worker Tensorflow Toxicity API
+        </h3>
       </div>
     </div>
 
