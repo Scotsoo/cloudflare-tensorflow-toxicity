@@ -26,7 +26,7 @@
     </div>
     <div class="flex">
       <p class="text-white m-auto pb-3">
-        made with 💗 on cloudflare by <a href="https://github.com/scotsoo">scotsoo</a> & <a href="https://github.com/whiteh">whiteh</a>
+        made with 💗 on <a class="underline" href="https://www.cloudflare.com/">cloudflare</a> by <a class="underline" href="https://github.com/scotsoo">scotsoo</a> & <a class="underline" href="https://github.com/whiteh">whiteh</a>
       </p>
     </div>
   </div>
