@@ -74,7 +74,7 @@ export default {
       }
       function getMatchText (val: boolean): string {
         if (val === null) {
-          return 'dnf'
+          return 'n/a'
         }
         return val.toString()
       }
