@@ -5,16 +5,10 @@
         <h1 class="sm:text-4xl lg:text-9xl uppercase bold text-gray-100">Toxicity API</h1>
       </div>
     </div>
-    <!-- <div class="flex">
-      <div class="flex">
-        <div class="m-auto w-8/12 h-auto">
-          <img class="sm:rounded-lg" src="./assets/console.svg" style="position: relative; top: -5vh;"/>
-        </div>
-      </div>
-    </div> -->
+
     <div class="flex pb-3 pt-3">
         <div class="m-auto">
-          <input v-model="message" v-on:keyup.enter="doPost" class="w-100 text-4xl shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="tryitout" type="text" placeholder="Try it out!">
+          <input v-model="message" v-on:keyup.enter="doPost()" class="w-100 text-4xl shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="tryitout" type="text" placeholder="Try it out!">
         </div>
       <br/>
     </div>
@@ -24,6 +18,7 @@
       </div>
     </div>
   </div>
+
 </template>
 <script lang="ts">
 import { Ref, ref } from 'vue'
@@ -55,18 +50,22 @@ export default {
       }
       return labelMap[val]
     }
+    // @ts-ignore
     async function doPost (message?: string) {
       const n = Date.now()
+      // @ts-ignore
       message = message || this?.message
       if (message === undefined || message.length === 0) {
         return
       }
-      const d = await axios.post<{}>('https://toxicity-api.com/', {
+      const d = await axios.post<{
+        time_taken: number
+        message: string
+      }>('https://toxicity-api.com/', {
         // @ts-ignore
         messages: message
       })
       // @ts-ignore
-      console.log('data', d)
       d.data.time_taken = Date.now() - n
       d.data.message = message
       // @ts-ignore
@@ -78,6 +77,7 @@ export default {
     }
   },
   async mounted () {
+    // @ts-ignore
     await this.doPost('You Suck!')
   }
 }

@@ -34,12 +34,10 @@
                   <div class="text-xs text-gray-500">ms</div>
                 </td>
               </tr>
-
-                <!-- More people... -->
             </tbody>
-            </table>
+          </table>
         </div>
-        </div>
+      </div>
     </div>
   </div>
 </template>
