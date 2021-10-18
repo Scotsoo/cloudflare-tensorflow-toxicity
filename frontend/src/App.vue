@@ -1,43 +1,28 @@
 <template>
-  <div class="w-screen bg-gray-900 h-3/6">
-    <input v-model="message"/>
-    <button @click="doPost">Run!</button>
-    <custom-table :tableData="data"/>
-    <h4>Last time taken {{timeTaken}}ms</h4>
-    <!-- <table>
-      <thead>
-        <td></td>
-        <td v-for="clasification in data[0].clasification" :key="clasification.label">
-          {{getLabel(clasification.label)}}
-        </td>
-      </thead>
-      <tbody>
-        <tr>
-          <td>
-            Is t/f:
-          </td>
-          <td v-for="clasification in data[0].clasification" :key="`${clasification.label}-row`">
-            {{clasification.results[0].match}}
-          </td>
-        </tr>
-        <tr>
-          <td>
-            Percent True:
-          </td>
-          <td v-for="clasification in data[0].clasification" :key="`${clasification.label}-t`">
-            {{clasification.results[0].probabilities[1] * 100}}
-          </td>
-        </tr>
-        <tr>
-          <td>
-            Percent False:
-          </td>
-          <td v-for="clasification in data[0].clasification" :key="`${clasification.label}-f`">
-            {{clasification.results[0].probabilities[0] * 100}}
-          </td>
-        </tr>
-      </tbody>
-    </table> -->
+  <div>
+    <div class="w-screen bg-gray-900 sm:h-1/6 lg:h-3/6 lg:min-h-1/3vh sm:min-h-1/4vh flex">
+      <div class="m-auto">
+        <h1 class="sm:text-4xl lg:text-9xl uppercase bold text-gray-100">Toxicity API</h1>
+      </div>
+    </div>
+    <!-- <div class="flex">
+      <div class="flex">
+        <div class="m-auto w-8/12 h-auto">
+          <img class="sm:rounded-lg" src="./assets/console.svg" style="position: relative; top: -5vh;"/>
+        </div>
+      </div>
+    </div> -->
+    <div class="flex pb-3 pt-3">
+        <div class="m-auto">
+          <input v-model="message" v-on:keyup.enter="doPost" class="w-100 text-4xl shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="tryitout" type="text" placeholder="Try it out!">
+        </div>
+      <br/>
+    </div>
+    <div class="flex">
+      <div class="m-auto h-auto lg:w-10/12 md:w-100">
+        <custom-table :tableData="data"/>
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -63,17 +48,20 @@ export default {
       'toxicity': 'Toxicity',
       'time_taken': 'Time Taken'
     }
-    let message: string = 'You suck!'
+    let message: string = ''
     function getLabel (val: string) {
       if (labelMap[val] === undefined) {
         return val
       }
       return labelMap[val]
     }
-    async function doPost () {
+    async function doPost (message?: string) {
       const n = Date.now()
-      const message = this?.message ?? 'You Suck!'
-      const d = await axios.post<{}>('https://toxicity.scotsoo.me/', {
+      message = message || this?.message
+      if (message === undefined || message.length === 0) {
+        return
+      }
+      const d = await axios.post<{}>('https://toxicity-api.com/', {
         // @ts-ignore
         messages: message
       })
@@ -90,7 +78,7 @@ export default {
     }
   },
   async mounted () {
-    await this.doPost()
+    await this.doPost('You Suck!')
   }
 }
 
