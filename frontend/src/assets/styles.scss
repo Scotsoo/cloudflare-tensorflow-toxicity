@@ -4,3 +4,28 @@
 #app {
   font-family: 'Roboto', sans-serif;
 }
+
+::-webkit-input-placeholder {
+  text-align: center;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+  text-align: center;
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+  text-align: center;
+}
+
+:-ms-input-placeholder {
+  text-align: center;
+}
+
+
+input{
+   text-align:center;
+}
+
+#ap, body {
+  overflow-x: hidden;
+}

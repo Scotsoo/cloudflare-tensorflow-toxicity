@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col" v-if="tableData.length > 0">
-    <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-      <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+    <div class="overflow-x-auto">
+      <div class="align-middle inline-block min-w-full">
         <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -19,7 +19,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200 text-center">
               <tr v-for="data in tableData" :key="data.message">
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-6 py-4">
                   <div class="text-lg text-gray">{{data.message}}</div>
                 </td>
                 <td v-for="clasification in data.clasification" :key="clasification.label" class="px-6 py-4 whitespace-nowrap text-center">
