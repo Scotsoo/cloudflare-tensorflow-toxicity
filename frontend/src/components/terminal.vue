@@ -29,19 +29,24 @@ export default {
   setup () {
     let message = ref('')
     let messages: Ref<string[]> = ref([])
-    async function startTyping() {
+    // @ts-ignore
+    async function startTyping(): void {
+      // @ts-ignore
       this.messages = []
+      // @ts-ignore
       this.message = ''
       const writeMessage = async (msg: string) =>{
+        // @ts-ignore
         this.message = ''
         let idx = 0
         const len = msg.length
         await new Promise((resolve) => {
           const interval = setInterval(() => {
+            // @ts-ignore
             this.message += msg[idx++]
             if (idx === len) {
               clearInterval(interval)
-              return resolve()
+              return resolve(0)
             }
           }, 60)
         })
@@ -52,12 +57,15 @@ export default {
         '% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current Dload  Upload   Total   Spent    Left  Speed',
         '100   855  100   828  100    27   1788     58 --:--:-- --:--:-- --:--:--  1846'
       ]
+      // @ts-ignore
       this.messages.push(this.message)
+      // @ts-ignore
       this.messages.push(...curlOutput)
+      // @ts-ignore
       this.message = ''
       await new Promise(resolve => {
         setTimeout(() => {
-          return resolve()
+          return resolve(0)
         }, 500)
       })
       const data = ['{',
@@ -149,22 +157,27 @@ export default {
       '  ]',
       '}',
       ]
-      const elem = document.getElementById('scroller')
+      const elem = document.getElementById('scroller') ?? {
+        scrollTop: () => {},
+        scrollHeight: 0
+      }
       for (const d of data) {
         await new Promise((resolve) => [
           setTimeout(() => {
+            // @ts-ignore
             this.messages.push(d)
             elem.scrollTop = elem.scrollHeight;
-            return resolve()
+            return resolve(0)
           }, 20)
         ])
       }
       await writeMessage('☣️☠️☣️☠️☣️☠️☣️☠️☣️')
       await new Promise(resolve => {
         setTimeout(() => {
-          return resolve()
+          return resolve(0)
         }, 10000)
       })
+      // @ts-ignore
       return startTyping.bind(this)()
     }
     return {
@@ -174,6 +187,7 @@ export default {
     }
   },
   mounted () {
+    // @ts-ignore
     this.startTyping()
   }
 }

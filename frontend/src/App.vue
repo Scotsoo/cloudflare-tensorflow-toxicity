@@ -79,6 +79,7 @@ export default {
   async mounted () {
     // @ts-ignore
     await this.doPost('You Suck!')
+    // @ts-ignore
     await this.doPost('We\'re dudes on computers, moron. You are quite astonishingly stupid!')
   }
 }
