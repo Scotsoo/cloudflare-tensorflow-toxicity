@@ -5,6 +5,7 @@
         <h1 class="sm:text-4xl lg:text-9xl uppercase bold text-gray-100">Toxicity API</h1>
         <h3 class="sm:text-l lg:text-4xl bold text-gray-100">
           cloudflare worker tensorflow
+          cloudflare worker tfjs
         </h3>
       </div>
     </div>
