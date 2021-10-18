@@ -26,7 +26,7 @@
                   <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full uppercase" :class="getPillClasses(clasification)">
                     {{getMatchText(clasification.results[0].match)}}
                   </span>
-                  <div class="text-sm text-gray-900">{{(clasification.results[0].probabilities[0] * 100).toFixed(3)}}</div>
+                  <div class="text-sm text-gray-900">{{(clasification.results[0].probabilities[1] * 100).toFixed(3)}}</div>
                   <div class="text-xs text-gray-500">Percent match</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
