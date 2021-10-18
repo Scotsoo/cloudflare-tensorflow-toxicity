@@ -79,7 +79,7 @@ export default {
     // @ts-ignore
     await this.doPost('You Suck!')
     // @ts-ignore
-    await this.doPost('We\'re dudes on computers, moron. You are quite astonishingly stupid!')
+    await this.doPost('Please stop. If you continue to vandalize Wikipedia, as you did to Kmart, you will be blocked from editing.')
   }
 }
 
